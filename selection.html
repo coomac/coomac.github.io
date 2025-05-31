@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<style>
+  body{font:14px/1.4 sans-serif;margin:0;padding:6px}
+  label{display:block;margin:2px 0}
+</style>
+<script>
+/* list every indicator field you expose ------------------------------- */
+const INDICATORS = [
+  {id:'Life_Expectancy_NBR_BOXCOX_ZS_1', label:'Life Expectancy'},
+  {id:'TRI_Percent_Cover_NBR_BOXCOX_ZS', label:'TRI Proximity'},
+  {id:'Annual_Extreme_Heat_Days_NBR__1', label:'Extreme Heat'},
+  {id:'Flood_EAL_Score_NBR_BOXCOX_ZSCO', label:'Flood Risk'}
+];
+
+function getSel(){                     /* read sel=… from parent URL   */
+  const m = parent.location.search.match(/[?&]sel=([^&]+)/);
+  return m ? decodeURIComponent(m[1]).split(',') : INDICATORS.map(i=>i.id);
+}
+
+function updateURL(list){              /* rewrite sel=… in parent URL  */
+  const u = new URL(parent.location);
+  u.searchParams.set('sel', list.join(','));
+  parent.history.replaceState({}, '', u);     // no page reload
+}
+
+window.onload = () =>{
+  const sel = new Set(getSel());
+  const wrap = document.body;
+
+  INDICATORS.forEach(ind =>{
+    const cb = document.createElement('input');
+    cb.type='checkbox';  cb.value=ind.id; cb.checked = sel.has(ind.id);
+    cb.onchange = ()=>{
+      cb.checked ? sel.add(ind.id) : sel.delete(ind.id);
+      updateURL(Array.from(sel));
+    };
+    const lab = document.createElement('label');
+    lab.append(cb, ' ', ind.label);
+    wrap.append(lab);
+  });
+};
+</script>
